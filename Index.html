@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fa;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            color: #17352d;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: #ffffff;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid #e4efeb;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(30, 70, 60, 0.09);
+        }
+
+        .left-panel {
+            padding: 38px 30px;
+            border-right: 1px solid #e6efeb;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #d9f5eb;
+            color: #07865d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 25px;
+        }
+
+        h1 {
+            font-size: 25px;
+            margin: 0 0 7px;
+            color: #17352d;
+        }
+
+        h3 {
+            font-size: 13px;
+            margin: 0;
+            font-weight: 500;
+            color: #658078;
+        }
+
+        .description {
+            color: #536b64;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 18px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 190px;
+            padding: 15px;
+            padding-bottom: 30px;
+            border: 1px solid #dce8e3;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            background: #fcfefd;
+            color: #243e36;
+            margin-bottom: 0;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea::placeholder {
+            color: #91a49d;
+        }
+
+        textarea:focus {
+            border-color: #10a875;
+            box-shadow: 0 0 0 3px rgba(16, 168, 117, 0.10);
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 11px;
+            color: #8da39a;
+            pointer-events: none;
+        }
+
+        button[type="submit"] {
+            background: #08a879;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background: #078b65;
+            transform: translateY(-1px);
+        }
+
+        button[type="submit"]:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #eff7ff;
+            border-radius: 9px;
+            padding: 14px;
+            margin-top: 18px;
+            color: #496982;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .tip-icon {
+            font-size: 19px;
+        }
+
+        .right-panel {
+            padding: 30px;
+            background: #f8fcfa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #summary-output {
+            flex: 1;
+            min-height: 430px;
+            background: #e8f8f2;
+            border: 1px solid #d7f0e6;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #summary-heading {
+            color: #17352d;
+            font-size: 17px;
+            margin: 0;
+        }
+
+        .output-counter {
+            font-size: 11px;
+            color: #658078;
+            background: #d8f3e8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .copy-btn {
+            background: #ffffff;
+            border: 1px solid #cce8dd;
+            color: #08a879;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .copy-btn:hover {
+            background: #08a879;
+            color: #ffffff;
+        }
+
+        #summary-text {
+            color: #59776c;
+            font-size: 14px;
+            line-height: 1.8;
+            text-align: justify;
+            width: 100%;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 25px 10px;
+        }
+
+        .empty-state.has-content {
+            justify-content: flex-start;
+            align-items: flex-start;
+            text-align: justify;
+            padding: 0;
+        }
+
+        .empty-icon {
+            width: 95px;
+            height: 95px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #d7f2e8;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            color: #148c68;
+        }
+
+        .empty-icon.hidden {
+            display: none;
+        }
+
+        .empty-icon svg {
+            width: 48px;
+            height: 48px;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #cbead2;
+            border-top: 4px solid #08a879;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state p {
+            max-width: 230px;
+            color: #648277;
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .empty-state.has-content p {
+            max-width: 100%;
+            color: #59776c;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+                align-items: flex-start;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .left-panel {
+                padding: 26px 22px;
+                border-right: none;
+                border-bottom: 1px solid #e6efeb;
+            }
+
+            .right-panel {
+                padding: 22px;
+            }
+
+            textarea {
+                height: 160px;
+            }
+
+            #summary-output {
+                min-height: 300px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <section class="left-panel">
+
+            <div class="brand">
+                <div class="logo">▤</div>
+
+                <div>
+                    <h1>Text Summarizer</h1>
+                    <h3>Using HuggingFace Transformer</h3>
+                </div>
+            </div>
+
+            <p class="description">
+                Paste your content below and turn lengthy text
+                into a clear, concise summary.
+            </p>
+
+            <form id="summarization-form">
+                <div class="textarea-wrapper">
+                    <textarea
+                        id="dialogue-input"
+                        placeholder="Paste your content here..."
+                        required
+                    ></textarea>
+                    <div class="char-counter" id="char-counter">0 chars | 0 words</div>
+                </div>
+
+                <button type="submit">▣ &nbsp; Summarize</button>
+            </form>
+
+            <div class="tip">
+                <span class="tip-icon">♧</span>
+                <span>
+                    <strong>Tip:</strong> You can paste articles,
+                    essays, notes or any long text to summarize.
+                </span>
+            </div>
+
+        </section>
+
+        <section class="right-panel">
+
+            <div id="summary-output">
+
+                <div class="summary-header-container">
+                    <h3 id="summary-heading">✦ &nbsp; Content Summary</h3>
+                    <div class="header-actions">
+                        <span class="output-counter" id="output-counter">0 chars | 0 words</span>
+                        <button id="copy-btn" class="copy-btn" type="button">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="empty-state-container">
+
+                    <div class="spinner" id="loading-spinner"></div>
+
+                    <div class="empty-icon" id="empty-icon">
+                        <svg viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M13 5h16l9 9v29H13z"></path>
+                            <path d="M29 5v10h9"></path>
+                            <path d="M19 23h13"></path>
+                            <path d="M19 29h13"></path>
+                            <path d="M19 35h8"></path>
+                        </svg>
+                    </div>
+
+                    <p id="summary-text">
+                        Your summary will appear here.
+                        Enter your text and click Summarize to get started.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+      const dialogueInput = document.getElementById("dialogue-input");
+      const charCounter = document.getElementById("char-counter");
+      const summaryText = document.getElementById("summary-text");
+      const copyBtn = document.getElementById("copy-btn");
+      const outputCounter = document.getElementById("output-counter");
+
+      // Input character & word counter
+      dialogueInput.addEventListener("input", () => {
+        const text = dialogueInput.value;
+        const charCount = text.length;
+        const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+        charCounter.innerText = `${charCount} chars | ${wordCount} words`;
+      });
+
+      // Copy to Clipboard logic
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(summaryText.innerText).then(() => {
+          copyBtn.innerText = "✓ Copied!";
+          setTimeout(() => {
+            copyBtn.innerText = "📋 Copy";
+          }, 2000);
+        });
+      });
+
+      document.getElementById("summarization-form").addEventListener("submit", async (e)=>{
+        e.preventDefault();
+
+        // Get reference to elements
+        const submitbutton = e.target.querySelector("button");
+        const emptyIcon = document.getElementById("empty-icon");
+        const emptyStateContainer = document.getElementById("empty-state-container");
+        const spinner = document.getElementById("loading-spinner");
+
+        const dialogue = dialogueInput.value.trim();
+        if (!dialogue) return;
+
+        // Show loading state
+        emptyIcon.classList.add("hidden");
+        spinner.style.display = "block";
+        emptyStateContainer.classList.remove("has-content");
+        copyBtn.style.display = "none";
+        outputCounter.style.display = "none";
+        summaryText.innerText = "Processing...";
+        submitbutton.disabled = true;
+
+        try {
+            // Send dialogue to backend
+            const response = await fetch("/summarize/", {
+                method: "POST",
+                headers: { "content-Type": "application/json" },
+                body: JSON.stringify({ dialogue }),
+            });
+
+            if (!response.ok) { 
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const rawSummary = data.summary || "No summary returned.";
+
+            // Capitalize sentence beginnings
+            const formattedSummary = rawSummary
+                .toLowerCase()
+                .replace(/(^\s*|[.!?]\s+)([a-z])/g, function(match) {
+                    return match.toUpperCase();
+                });
+
+            const finalSummary = formattedSummary.charAt(0).toUpperCase() + formattedSummary.slice(1);
+            summaryText.innerText = finalSummary;
+
+            // Output Word & Character Counter
+            const outChars = finalSummary.length;
+            const outWords = finalSummary.trim() ? finalSummary.trim().split(/\s+/).length : 0;
+            outputCounter.innerText = `${outChars} chars | ${outWords} words`;
+
+            // Display UI elements
+            emptyStateContainer.classList.add("has-content");
+            copyBtn.style.display = "inline-block";
+            outputCounter.style.display = "inline-block";
+
+        } catch (err) {
+            summaryText.innerText = `Error: ${err.message}`;
+        } finally {
+            spinner.style.display = "none";
+            submitbutton.disabled = false;
+        }
+      });
+    </script>
+
+</body>
+</html>
